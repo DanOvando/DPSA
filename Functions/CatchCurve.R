@@ -41,7 +41,6 @@ CatchCurve<- function(LengthDat,CatchCurveWeight,WeightedRegression, ReserveYr,O
   ################
   #### Process Data ####
   ################
-  
   FindPeaks<- function(Freqs,Fish)
   {
     MaxPeak<- max(Freqs)
@@ -64,7 +63,11 @@ CatchCurve<- function(LengthDat,CatchCurveWeight,WeightedRegression, ReserveYr,O
   
   CCWeight<- CatchCurveWeight
   
-  SampleSizeSummary<- ddply(LengthDat,c('Year'),summarize,SampleSize=length(Length))
+#   SampleSizeSummary<- ddply(LengthDat,c('Year'),summarize,SampleSize=length(Length))
+  
+  SampleSizeSummary<- LengthDat %>%
+    group_by(Year) %>%
+    summarize(SampleSize=length(Length))
   
   SufficientSamples<- SampleSizeSummary$SampleSize>MinSampleSize
   
@@ -475,8 +478,12 @@ CatchCurve<- function(LengthDat,CatchCurveWeight,WeightedRegression, ReserveYr,O
     
     MCDetails$WeightedSample<- (1-Fish$Alpha)*MCDetails$SampleSize/max(MCDetails$SampleSize,na.rm=T)
     
-    MeanNaturalMort=ddply(MCDetails,c('Iteration'),summarize,
-                          MeanNaturalMort=sum(NaturalMortality*(WeightedYear+WeightedSample),na.rm=T)/sum(WeightedYear+WeightedSample,na.rm=T))
+#     MeanNaturalMort <- ddply(MCDetails,c('Iteration'),summarize,
+#                           MeanNaturalMort=sum(NaturalMortality*(WeightedYear+WeightedSample),na.rm=T)/sum(WeightedYear+WeightedSample,na.rm=T))
+#     
+    MeanNaturalMort <- MCDetails %>%
+      group_by(Iteration) %>% 
+      summarize(MeanNaturalMort=sum(NaturalMortality*(WeightedYear+WeightedSample),na.rm=T)/sum(WeightedYear+WeightedSample,na.rm=T))
     
     MCDetails<- join(MCDetails,MeanNaturalMort,by='Iteration')
     

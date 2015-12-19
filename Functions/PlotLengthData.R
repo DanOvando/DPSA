@@ -14,7 +14,7 @@ PlotLengthData<- function(LengthDat,FigureFolder,Fish,Species,Site,Theme)
   +scale_fill_manual(name='',values=c(FishedColor,MPAColor))
   +geom_vline(xintercept=Fish$Mat50,linetype='longdash')+
     geom_vline(xintercept=Fish$Linf,linetype='longdash',color='red2')+
-    facet_wrap(~Year,as.table=F)+ggtitle(paste(Species,Site,sep='-'))+Theme)
+    facet_wrap(~Year,as.table=F, scales = 'free_y')+ggtitle(paste(Species,Site,sep='-'))+Theme)
   
   print(LengthDist)
   

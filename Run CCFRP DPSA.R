@@ -28,7 +28,7 @@ source("SubFunctions.R") #Pull in helper functions for assessment modules
 
 # High Level Assessment Options -------------------------------------------
 
-Assessment <- '5.0 On The Table'
+Assessment <- 'Fisheries Research Draft'
 
 dir.create(Assessment)
 
@@ -111,7 +111,7 @@ GFD$t0[is.na(GFD$t0)]<- 0
 SpeciesCatches <- GFD %>%
   group_by(CommName) %>%
   summarize(NumberSampled = length(length_cm),HasLifeHistory = mean(vbk))
-  
+
 
 SpeciesCatches$NumberSampled<- SpeciesCatches$NumberSampled*as.numeric(is.na(SpeciesCatches$HasLifeHistory)==F)*as.numeric((SpeciesCatches$NumberSampled)>MinSampleSize)
 
@@ -149,11 +149,11 @@ if (RunAssessments==T)
     TopSpecies<- GFD[WhereSite,] %>%
       group_by(CommName) %>%
       summarize(NumSamples=length(length_cm[length_cm>0]))
-      
-#     TopSpecies<- ddply(GFD[WhereSite,],c('CommName'),summarize,NumSamples=length(length_cm[length_cm>0]))
+    
+    #     TopSpecies<- ddply(GFD[WhereSite,],c('CommName'),summarize,NumSamples=length(length_cm[length_cm>0]))
     
     
-        Fishes<- subset(TopSpecies,NumSamples>MinSampleSize)$CommName
+    Fishes<- subset(TopSpecies,NumSamples>MinSampleSize)$CommName
     
     for (f in seq_len(length(Fishes)))
       #     for (f in 9)
@@ -267,7 +267,7 @@ if (RunAssessments==T)
       PlotCPUEData(CPUEData,FigureFolder,Fish,Species,Sites[s],Theme)
       
       MapCCFRP(ReformData)
-    
+      
       
       Fish$LHITol<- 0.99
       
@@ -718,7 +718,7 @@ dev.off()
 
 pdf(file=paste(Assessment,'Reference Point Plot.pdf',sep='/'))
 ReferencePlot<- (ggplot(data=subset(AllMonte,Year==max(Year) & RanAllAssess==T),aes(factor(Metric),RefPoint,fill=GoodThing))
-                 +geom_violin()+facet_wrap(~Species,scale='free_y')+PaperBarTheme+geom_hline(yintercept=1)+
+                 +geom_violin()+facet_wrap(~Species,scales='free_y')+PaperBarTheme+geom_hline(yintercept=1)+
                    xlab("")+ylab('Relative to Reference Point')
                  +scale_fill_manual(name='',values=c('red','blue')))
 (ReferencePlot)
