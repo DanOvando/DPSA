@@ -198,7 +198,7 @@ if (RunAssessments==T)
       #     }
       #     
       ClosestMvK<- which((Fish$MvK-LHI$MeanMvK)^2==min((Fish$MvK-LHI$MeanMvK)^2))[1]
-      
+      browser()
       Fish$LengthMatRatio<- LHI$MeanLMATvMLinf[ClosestMvK]
       
       Fish$MinMvK<- LHI$MinMvK[ClosestMvK]

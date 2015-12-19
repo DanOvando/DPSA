@@ -2,7 +2,6 @@ DBSRA<- function(CatchDat,DCAC.start.yr,DCAC.end.yr,delta.yr,DBSRA.OFL.yr,FMSYto
 {
   
   # DCAC and DB-SRA
-  # Version 4d
   # CatchDat<- CatchData
   # DCAC.start.yr <- 1963 #start of the catch period
   # DCAC.end.yr<- 2011 #end of the catch period
@@ -74,7 +73,7 @@ DBSRA<- function(CatchDat,DCAC.start.yr,DCAC.end.yr,delta.yr,DBSRA.OFL.yr,FMSYto
   parms.df$DBSRA.OFL.yr <- DBSRA.OFL.yr
   parms.df$M.est <- Fish$M
   parms.df$SD.lnM <- Fish$MortalityError
-  parms.df$FMSYtoMratio <- FMSYtoMratio
+  parms.df$FMSYtoMratio <- FMSYtoMRatio
   parms.df$SD.FMSYtoMratio <- SD.FMSYtoMratio
   parms.df$Delta <- Delta
   parms.df$SD.Delta <- SD.Delta
@@ -111,7 +110,6 @@ DBSRA<- function(CatchDat,DCAC.start.yr,DCAC.end.yr,delta.yr,DBSRA.OFL.yr,FMSYto
     lands.df$catch.mt<- InterpCatch	
     
   }
-  
   
   # get first and last year of landings for each species and append to parms.df
   first.yr <- numeric(N.spp)
@@ -552,7 +550,6 @@ DBSRA<- function(CatchDat,DCAC.start.yr,DCAC.end.yr,delta.yr,DBSRA.OFL.yr,FMSYto
         # add year labels to the time series vectors
         names(B.vec) <- names(P.vec) <- first.yr:(last.yr+1)
         names(C.vec) <- first.yr:last.yr
-        
         Btgt.to.B0.ratio <- as.numeric(B.vec[as.character(delta.yr)]/B0)
         obj.fun <- as.numeric(abs(B.vec[as.character(delta.yr)] - Depletion*B0))
         
