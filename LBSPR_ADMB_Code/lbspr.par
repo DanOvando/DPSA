@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Number of parameters = 3  Objective function value = 0.195745  Maximum gradient component = 3.36210e-05
 # logSL50:
 3.09104041802
@@ -5,3 +6,12 @@
 1.91082590933
 # logFM:
 2.08522765246
+=======
+# Number of parameters = 3  Objective function value = 0.0712834  Maximum gradient component = 5.60531e-05
+# logSL50:
+3.24378219230
+# logDelta:
+0.00269387998569
+# logFM:
+-0.464978906844
+>>>>>>> 1a5bab73832bba0cdd80858a3fb8c846f4ff268e
