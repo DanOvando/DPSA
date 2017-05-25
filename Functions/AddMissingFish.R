@@ -1,6 +1,11 @@
 
 # AddMissingFish ----------------------------------------------------------
 #This code adds "zero" counts for all species ever observed at a site but not observed on a given trip
+#'
+#' @param Data 
+#'
+#' @return Data with missing observations added in
+#' @export
 AddMissingFish<- function(Data)
 {
   

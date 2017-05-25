@@ -75,6 +75,7 @@ private:
   param_vector RecProbs;
   param_vector PredLenComp;
   param_vector PredUnfishedComp;
+  param_vector PredFishedComp;
   param_vector Vul;
   param_vector MkL;
   param_vector FkL;
@@ -104,7 +105,7 @@ private:
   objective_function_value obj_fun;
 public:
   virtual void userfunction(void);
-  virtual void report(void);
+  virtual void report(const dvector& gradients);
   virtual void final_calcs(void);
   model_parameters(int sz,int argc, char * argv[]);
   virtual void initializationfunction(void){}

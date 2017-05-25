@@ -5,7 +5,9 @@ MapCCFRP<- function(Data)
   
   LengthData<- Data$LengthData %>% subset(is.na(SiteType)==F)
   
-  MapDat<- ddply(LengthData,c('SiteType','Year','Fish'),summarize,MeanLength=mean(Length,na.rm=T),Lon=mean(MeanLongitude),
+  MapDat<- LengthData %>%
+    group_by(SiteType,Year,Fish) %>%
+    summarize(MeanLength=mean(Length,na.rm=T),Lon=mean(MeanLongitude),
                  Lat=mean(MeanLatitude),Reserve=unique(MPA))
   
   MapDat$MPA[MapDat$Reserve==0]<- 'Reference'
@@ -65,7 +67,9 @@ dev.off()
 
 DensityData<- Data$DensityData %>% subset(is.na(SiteType)==F)
 
-MapDat<- ddply(DensityData,c('SiteType','Year','Fish'),summarize,
+MapDat<- DensityData %>%
+  group_by(SiteType, Year, Fish) %>%
+    summarize(
                Density=sum(Biomass,na.rm=T)/sum(SampleArea,na.rm=T),
                WeightedDensity=sum(DistanceFromBorder*Biomass/SampleArea,na.rm=T)/sum(DistanceFromBorder,na.rm=T),
                Lon=mean(MeanLongitude),

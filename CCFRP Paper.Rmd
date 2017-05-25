@@ -4,23 +4,26 @@ title: Challenges in the Application of Data-Limited Assessments;  A Case Study 
 author: "Dan Ovando, Jono Wilson, Dean Wendt, Rick Starr"
 date: "June 25, 2015"
 output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 5
+    fig_width: 6
+    number_sections: yes
+    toc: yes
   html_document:
     fig_align: center
     fig_caption: yes
     fig_height: 5
     fig_width: 5
-  pdf_document:
-    fig_caption: yes
-    fig_height: 5
-    fig_width: 6
+    number_sections: yes
+    toc: yes
   word_document:
     fig_caption: yes
     fig_height: 5
     fig_width: 5
-number_sections: yes
+    toc: yes
 csl: fish-and-fisheries.csl
 bibliography: CCFRP Paper.bib
-toc: yes
 ---
 
 ```{r,echo=F,message=FALSE,warning=FALSE}
@@ -31,7 +34,7 @@ library(ggplot2)
 library(tidyr)
 library(grid)
 library(gridExtra)
-Assessment<- 'Fisheries Research Draft'
+Assessment<- 'LBSPR Fix'
 
 Results<- read.csv(paste(Assessment,'Complete Assessment Results.csv',sep='/'))
 
@@ -391,7 +394,7 @@ DO was funded by a contract with The Nature Conservancy. We are grateful to all 
 
 # Supplementary Tables
 
-```{r echo=F,message=FALSE,warning=FALSE}
+```{r echo = F, message = FALSE, warning = FALSE}
 kable(subset(Results,Year==max(Year)) %>%
         select(Species,Method,SampleSize,Value,Metric)
       ,digits=2,caption='Summary of DLA results in 2014')

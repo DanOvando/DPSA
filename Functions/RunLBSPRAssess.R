@@ -116,6 +116,7 @@ RunLBSPRAssess <- function(AssessPars, LenFreq, LenMids, ADMBDir, ExName="lbspr"
     Obs <- modoutput[(NLBins+2):(NLBins+1+NLBins)]
     Bins <- modoutput[(NLBins+2+NLBins):(NLBins+NLBins+NLBins+1)]
     Unfished <- modoutput[(NLBins+2+NLBins+NLBins):(NLBins+NLBins+NLBins+NLBins+1)] 
+    Fished <- modoutput[(NLBins+2+NLBins+NLBins+NLBins):(NLBins+NLBins+NLBins+NLBins+NLBins +1)] 
     ObjFunVal <- modoutput[length(modoutput)-1]
     Grad <- modoutput[length(modoutput)]
     # Read in Correlation
@@ -143,6 +144,7 @@ RunLBSPRAssess <- function(AssessPars, LenFreq, LenMids, ADMBDir, ExName="lbspr"
     Output$Obs <- Obs
     Output$Bins <- Bins
     Output$Unfished <- Unfished
+    Output$Fished <- Fished
     Output$ObjFunVal <- ObjFunVal
     Output$Grad <- Grad
     Output$Cormat <- cormat

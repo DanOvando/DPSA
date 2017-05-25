@@ -1,3 +1,7 @@
+#' ApplyLifeHistoryError
+#' Applies error to life history parameters
+#' @return Fish object with error added in
+#' @export
 ApplyLifeHistoryError<- function()
 {
   

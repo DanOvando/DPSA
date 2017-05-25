@@ -69,7 +69,9 @@ FormatCCFRPData<- function(Data)
   
   # Format CPUE Data -----------------------------------------------------
   
-  CPUEData<- ddply(Data,c('Year','Month','sample_Idcellday'),plyr::summarize,Site='All',Count=sum(length_cm>0 | is.na(length_cm),na.rm=T),Biomass=sum(Weight,na.rm=T)
+  CPUEData<- Data %>%
+    group_by(Year,Month,sample_Idcellday) %>%
+    summarize(Site='All',Count=sum(length_cm>0 | is.na(length_cm),na.rm=T),Biomass=sum(Weight,na.rm=T)
                    ,AnglerHours= sum(Angler_hours,na.rm=T),DistanceFromBorder=mean(Meters.to.MPA.border,na.rm=T)
                    ,SampleType=unique(Sample_Type),MPA=unique(MPA_or_REF),
                    DistanceProtected=mean(Meters.to.MPA.border,na.rm=T),MeanLongitude=mean(MeanLon,na.rm=T),

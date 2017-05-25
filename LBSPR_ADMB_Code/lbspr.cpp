@@ -79,6 +79,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     PredUnfishedComp.initialize();
   #endif
+  PredFishedComp.allocate(1,NLenMids,"PredFishedComp");
+  #ifndef NO_AD_INITIALIZE
+    PredFishedComp.initialize();
+  #endif
   Vul.allocate(1,NLenMids+1,"Vul");
   #ifndef NO_AD_INITIALIZE
     Vul.initialize();
@@ -171,7 +175,11 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
 void model_parameters::preliminary_calculations(void)
 {
 
+#if defined(USE_ADPVM)
+
   admaster_slave_variable_interface(*this);
+
+#endif
  int X;
  double pi = 3.14159265358979323844;
  MatDelta = L95 - L50;
@@ -181,13 +189,10 @@ void model_parameters::preliminary_calculations(void)
  SDLinf = CVLinf * Linf;
  LinfdL = ((Linf + MaxSD * SDLinf) - (Linf - MaxSD * SDLinf))/(NGTG-1);
  for (X=0;X<NGTG;X++) {
-   DiffLinfs(X+1) = (Linf - MaxSD * SDLinf) + X * LinfdL;  	 
+   DiffLinfs(X+1) = (Linf - MaxSD * SDLinf) + X * LinfdL;
  }
- 
  RecProbs = 1/(sqrt(2*pi*SDLinf*SDLinf)) * mfexp(-(elem_prod((DiffLinfs-Linf),(DiffLinfs-Linf)))/(2*SDLinf*SDLinf));
  RecProbs = RecProbs/sum(RecProbs);
- 
- cout << "damnit" << endl;
 }
 
 void model_parameters::userfunction(void)
@@ -195,23 +200,23 @@ void model_parameters::userfunction(void)
   obj_fun =0.0;
   int Gtype, L;
   FMpar = mfexp(logFM); // estimated F/M
-  SL50 = mfexp(logSL50); 
+  SL50 = mfexp(logSL50);
   Delta = mfexp(logDelta);
   Vul = 1.0/(1+mfexp(-log(19)*(LenBins-SL50)/Delta));
   MkL = Mk * pow(Linf/LenBins, Mpow);
   FkL = FMpar * Mk * Vul;
   for (Gtype=1;Gtype<=NGTG;Gtype++) {
 	MKLMat(Gtype) = MkL + kslope*(DiffLinfs(Gtype) - Linf);
-    ZKLMat(Gtype) = MKLMat(Gtype) + FkL;  
+    ZKLMat(Gtype) = MKLMat(Gtype) + FkL;
 	currMkL = MKLMat(Gtype);
 	currZkL = ZKLMat(Gtype);
-    PUnFished = 0; 
-    PFished = 0; 
-    NUnFished = 0; 
+    PUnFished = 0;
+    PFished = 0;
+    NUnFished = 0;
     NFished = 0 ;
     PUnFished(1) = RecProbs(Gtype);
     PFished(1) = RecProbs(Gtype);
-    GTGLinf = DiffLinfs(Gtype); 
+    GTGLinf = DiffLinfs(Gtype);
     for (L=2;L<=NLenMids+1;L++) {
      if (LenBins(L) < GTGLinf) {
        PUnFished(L) = PUnFished(L-1) * pow(((GTGLinf-LenBins(L))/(GTGLinf-LenBins(L-1))),currMkL(L-1));
@@ -219,15 +224,15 @@ void model_parameters::userfunction(void)
      }
      if (LenBins(L) >= GTGLinf) {
        PUnFished(L) = 0;
-       PFished(L) = 0; 
+       PFished(L) = 0;
      }
    }
    for (L=1;L<=NLenMids;L++) {
  	NUnFished(L)  = (PUnFished(L) - PUnFished(L+1))/currMkL(L);
- 	NFished(L) =  (PFished(L) - PFished(L+1))/currZkL(L);	
+ 	NFished(L) =  (PFished(L) - PFished(L+1))/currZkL(L);
    }
   UnfishedMatrix(Gtype) =  NUnFished;
-  FishedMatrix(Gtype) = NFished;  
+  FishedMatrix(Gtype) = NFished;
   EP0_gtg(Gtype) = sum(elem_prod(NUnFished, Fec));
   EPf_gtg(Gtype) = sum(elem_prod(NFished, Fec));
   }
@@ -236,6 +241,9 @@ void model_parameters::userfunction(void)
   SPR =  EPf/EP0;
   PredUnfishedComp = colsum(UnfishedMatrix);
   PredUnfishedComp = PredUnfishedComp/sum(PredUnfishedComp);
+  // cout<<"hello"<<endl;
+  PredFishedComp = colsum(FishedMatrix);
+  PredFishedComp = PredFishedComp/sum(PredFishedComp);
   PredLenComp = colsum(FishedMatrix);
   PredLenComp =  elem_prod(PredLenComp,  1.0/(1+mfexp(-log(19)*(LenMids-SL50)/Delta)));
   PredLenComp = PredLenComp/sum(PredLenComp);
@@ -243,7 +251,7 @@ void model_parameters::userfunction(void)
   obj_fun = -sum(elem_prod(ObsLength, log(elem_div(PredLenComp+0.00000001,ObsLength+0.00000001)))); // AP from ADMB living doc
 }
 
-void model_parameters::report()
+void model_parameters::report(const dvector& gradients)
 {
  adstring ad_tmp=initial_params::get_reportfile_name();
   ofstream report((char*)(adprogram_name + ad_tmp));
@@ -257,6 +265,7 @@ void model_parameters::report()
  report << ObsLength << endl; // original length data
  report << LenMids << endl; // length bins
  report << PredUnfishedComp << endl; // Unfished length composition
+ report << PredFishedComp << endl; // Fished length composition
  report << obj_fun << endl; // likelihood obj_fun
  report << objective_function_value::pobjfun->gmax; // maximum gradient value
 }
@@ -291,7 +300,6 @@ int main(int argc,char * argv[])
  gradient_structure::set_CMPDIF_BUFFER_SIZE(1.e7);
  gradient_structure::set_MAX_NVAR_OFFSET(5000);
  gradient_structure::set_NUM_DEPENDENT_VARIABLES(5000);
-  
     gradient_structure::set_NO_DERIVATIVES();
     gradient_structure::set_YES_SAVE_VARIABLES_VALUES();
     if (!arrmblsize) arrmblsize=15000000;

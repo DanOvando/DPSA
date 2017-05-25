@@ -1,3 +1,17 @@
+#' Build par file for LBSPR
+#'
+#' @param Fish 
+#' @param Mpow 
+#' @param NGTG 
+#' @param MaxSD 
+#' @param FecB 
+#' @param SL50Min 
+#' @param SL50Max 
+#' @param DeltaMin 
+#' @param DeltaMax 
+#'
+#' @return a pars file for LBSPR ADMB
+#' @export
 BuildLBSPRPars<- function(Fish,Mpow,NGTG,MaxSD,FecB,SL50Min,SL50Max,DeltaMin,DeltaMax)
 {
   with(Fish,{

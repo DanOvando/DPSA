@@ -1,3 +1,12 @@
+#' AgeAtLength 
+#' returns the age at length for a Von Bert relationship
+#'
+#' @param Lengths a vector of lengths
+#' @param Fish a list object containing von bert parameters
+#' @param Error the base standard deviation of the age at length conversion
+#'
+#' @return a vector of ages at length
+#' @export
 AgeAtLength<- function(Lengths,Fish,Error)
 {
   # Error<- Fish$LengthError	

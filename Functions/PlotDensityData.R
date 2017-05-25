@@ -1,7 +1,9 @@
 PlotDensityData<- function(DensityDat,FigureFolder,Fish,Species,Site,Theme)
 {
 #   DensityDat<- DensityData
-  DensitySummary<- ddply(DensityDat,c('Year','MPA'),plyr::summarize,NumberDensity=mean(Count/SampleArea,na.rm=T),BiomassDensity=mean(Biomass/SampleArea,na.rm=T))
+  DensitySummary<- DensityDat %>%
+    group_by(Year,MPA) %>%
+    summarize(NumberDensity=mean(Count/SampleArea,na.rm=T),BiomassDensity=mean(Biomass/SampleArea,na.rm=T))
   
   DensitySummary$SiteType[DensitySummary$MPA==0]<- 'Fished'
   

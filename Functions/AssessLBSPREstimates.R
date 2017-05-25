@@ -1,3 +1,13 @@
+#' Assess the residuals from the LBSPR function
+#'
+#' \code{AssessLBSPRResiduals} look at the residuals between observed
+#' and predicted cohorts by LBSPR to look for bias
+#' @param Estimates predicted and observed length data
+#' @param Fish Fish based life history
+#' @param Year The current year
+#'
+#' @return
+#' @export
 AssessLBSPRResiduals<- function(Estimates,Fish,Year)
 {
 #  Estimates<- runMod

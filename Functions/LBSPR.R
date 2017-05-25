@@ -172,10 +172,39 @@ LBSPR<-function(LengthDat,EstimateM,Iterations,BootStrap,LifeError,LengthBins,Re
         dev.off()
         ResidualAnalysis<- AssessLBSPRResiduals(runMod,Fish,Years[y])
         
+        SL50 = Selectivity %>%
+          filter(Par == 'SL50') %>%
+          select(Est)
+        
+        SL95 = Selectivity %>%
+          filter(Par == 'SL95') %>%
+          select(Est)
+        
+        ages = 1:Fish$MaxAge
+        
+        length_at_age = LengthAtAge(ages,Fish,0)
+        
+        sel_at_age = selectivity(length_at_age, shape = 
+                                   data.frame(SL50 = SL50$Est, SL95 = SL95$Est))
+        
+        selectivity_ogive = selectivity(LenMids, shape = 
+                                          data.frame(SL50 = SL50$Est, SL95 = SL95$Est))
+        
+        # Correctly weight F by selectivity at age
+        f_v_m_est <- runMod$Estimates %>%
+          filter(Par == 'FMpar')
+        
+        f_est <- f_v_m_est$Est * Fish$M
+        
+        weighted_f <- mean(f_est * sel_at_age) #sum(f_est * selectivity_ogive * runMod$Fished)/sum(runMod$Fished)
+        
+        weighted_fvm <- weighted_f / Fish$M
+        
+        runMod$Estimates$Est[runMod$Estimates$Par == 'FMpar'] = weighted_fvm
+        
         CohortDeviates<- rbind(CohortDeviates,ResidualAnalysis$CohortDeviates)
         
         AgeDeviates<- rbind(AgeDeviates,ResidualAnalysis$AgeDeviates)
-        
         MCOutput[c,]<- data.frame(i,Years[y],'LBSPR',runMod$Estimates$Est[runMod$Estimates$Par=='SPR'],NA,NA,
                                   runMod$Estimates$SD[runMod$Estimates$Par=='SPR'],'SPR',Flag,stringsAsFactors=F)
         
@@ -194,7 +223,9 @@ LBSPR<-function(LengthDat,EstimateM,Iterations,BootStrap,LifeError,LengthBins,Re
   #########################################
   MCOutput<- subset(MCOutput,is.na(Iteration)==F)
   
-  SampleSize<- ddply(LengthDat,c('Year'),summarize,Samples=length(Length))
+  SampleSize<- LengthDat %>%
+    group_by(Year) %>%
+    summarize(Samples=length(Length))
   
   TrueIteration<- MCOutput$Iteration==1 & is.na(MCOutput$Iteration)==F
   
@@ -223,8 +254,10 @@ LBSPR<-function(LengthDat,EstimateM,Iterations,BootStrap,LifeError,LengthBins,Re
   
   MCOutput<- join(MCOutput,SampleSize,by='Year')  
   
-  FOutput<- ddply(MCDetails,c('Year'),summarize,Method='LBSPR',SampleSize=NA,Value=mean(FvM,na.rm=T),LowerCI=NA,UpperCI=NA,
-                  SD=NA,Metric='FvM',Flag=NA)
+  FOutput<- MCDetails %>%
+    group_by(Year) %>%
+    summarize(Method='LBSPR',SampleSize=NA,Value=mean(FvM,na.rm=T),LowerCI=NA,UpperCI=NA,
+              SD=NA,Metric='FvM',Flag=NA)
   
   if (Iterations>1)
   {
@@ -232,13 +265,17 @@ LBSPR<-function(LengthDat,EstimateM,Iterations,BootStrap,LifeError,LengthBins,Re
     
     MCOutput$value<- MCOutput$Value
     
-    Output<- ddply(MCOutput,c('Year'),summarize,Method='LBSPR',SampleSize=unique(Samples),Value=mean(value,na.rm=T),
-                   LowerCI=quantile(value,0.025,na.rm=T),UpperCI=quantile(value,0.975,na.rm=T),SD=sd(value,na.rm=T),
-                   Metric='SPR',Flag='None')
+    Output<- MCOutput %>%
+      group_by(Year) %>%
+      summarize(Method='LBSPR',SampleSize=unique(Samples),Value=mean(value,na.rm=T),
+                LowerCI=quantile(value,0.025,na.rm=T),UpperCI=quantile(value,0.975,na.rm=T),SD=sd(value,na.rm=T),
+                Metric='SPR',Flag='None')
     
-    FOutput<- ddply(MCDetails,c('Year'),summarize,Method='LBSPR',SampleSize=NA,Value=mean(FvM,na.rm=T),
-                    LowerCI=quantile(FvM,0.025,na.rm=T),UpperCI=quantile(FvM,0.975,na.rm=T),
-                    SD=sd(FvM,na.rm=T),Metric='FvM',Flag=NA)
+    FOutput<- MCDetails %>%
+      group_by(Year) %>%
+      summarize(Method='LBSPR',SampleSize=NA,Value=mean(FvM,na.rm=T),
+                LowerCI=quantile(FvM,0.025,na.rm=T),UpperCI=quantile(FvM,0.975,na.rm=T),
+                SD=sd(FvM,na.rm=T),Metric='FvM',Flag=NA)
     
     Output$Flag<-TrueOutput$Flag 
     
@@ -271,7 +308,7 @@ LBSPR<-function(LengthDat,EstimateM,Iterations,BootStrap,LifeError,LengthBins,Re
       
       pdf(file=paste(FigureFolder,' LBSPR SPR Boxplots.pdf',sep=''))
       print(ggplot(data=MCOutput,aes(factor(Year),Value,fill=Samples))+geom_boxplot() +
-            scale_fill_gradient(low = 'red', high = 'green')
+              scale_fill_gradient(low = 'red', high = 'green')
             + xlab('Year')+ylab('SPR'))
       dev.off()
       
@@ -281,11 +318,11 @@ LBSPR<-function(LengthDat,EstimateM,Iterations,BootStrap,LifeError,LengthBins,Re
               scale_fill_gradient(low = 'red', high = 'green')
             +xlab('Year')+ylab('F/M'))  
       dev.off()
-
-            pdf(file=paste(FigureFolder,' LBSPR F Boxplots.pdf',sep=''))
+      
+      pdf(file=paste(FigureFolder,' LBSPR F Boxplots.pdf',sep=''))
       print(ggplot(data=MCDetails,aes(factor(Year),F,fill=Samples))+geom_boxplot(varwidth=F) + 
               scale_fill_gradient(low = 'red', high = 'green') +
-            xlab('Year')+ylab('F')+geom_hline(yintercept=Fish$M,linetype='longdash'))  
+              xlab('Year')+ylab('F')+geom_hline(yintercept=Fish$M,linetype='longdash'))  
       dev.off()
     }
     if (length(unique(MCOutput$Year))==1)
